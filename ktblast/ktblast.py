@@ -127,15 +127,24 @@ def ktblast(kspace, calib, calib_win=None, freq_win=None,
         xf_calib *= freq_win*safety_margin
 
         # Squared magnitude gives estimated squared deviation.
-        # I don't know how this is actually supposed to work, so just
-        # assume that the middle column in the middle diagonal and
-        # ignore the rest?
-        M2 = np.abs(xf_calib)**2
-        M2 = np.diag(M2[:, ct2])
+        # I don't know how this is actually supposed to work...
+        # M2 = np.abs(xf_calib)**2
+        M2 = np.abs(xf_calib @ xf_calib.conj().T)
+        print(M2.shape)
+        # M2 = M2[:, :kx]
+        # M2 = np.diag(M2[:, ct2])
 
         # Don't worry about coil sensitivities for now k-t BLAST
-        recon[:, ii, :] = xf_base + M2 @ np.linalg.pinv(
-            M2 + Cn) @ (xf_resid - xf_base)
+        # recon[:, ii, :] = xf_base + M2 @ np.linalg.inv(
+        #     M2 + Cn) @ (xf_resid - xf_base)
+        # S = np.ones((kx, kx))
+        # recon[:, ii, :] = xf_base + M2 @ S.T @ np.linalg.inv(
+        #     S @ M2 @ S.T + Cn) @ (xf_resid - S @ xf_base)
+        recon[:, ii, :] = M2 @ np.linalg.pinv(
+            M2 + np.sum(
+                np.abs(xf_resid)**2, axis=(0, 1))**2 + Cn) @ xf_resid
+        # recon[: ii, :] = M2 @ np.linalg.pinv(M2 + .01*Cn) @ xf_resid
+        # recon[:, ii, :] = xf_base
 
     # Fourier transform across frequency to get time back
     recon = 1/np.sqrt(kt)*np.fft.ifftshift(np.fft.fft(np.fft.fftshift(
@@ -145,6 +154,7 @@ def ktblast(kspace, calib, calib_win=None, freq_win=None,
     # think...
 
     # Move time_axis back to where the user had it
+    # recon -= imspace_avg[..., None]
     return np.moveaxis(recon, -1, time_axis)
 
 if __name__ == '__main__':
