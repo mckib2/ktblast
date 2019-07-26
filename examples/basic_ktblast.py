@@ -7,7 +7,7 @@ from ktblast import ktblast
 
 if __name__ == '__main__':
 
-    N = 128
+    N = 32
     ph = shepp_logan(N)
     ph = (ph + 1j*ph)*N
     kt = 100
@@ -39,4 +39,8 @@ if __name__ == '__main__':
     # Run k-t BLAST
     calib_win = np.hanning(calib.shape[0])[:, None] # PE direction
     freq_win = np.hanning(ct)
-    ktblast(kspace, calib, calib_win=calib_win, freq_win=freq_win)
+    recon = ktblast(
+        kspace, calib, calib_win=calib_win, freq_win=freq_win)
+
+    from mr_utils import view
+    view(recon, fft_axes=(0, 1), movie_axis=2)

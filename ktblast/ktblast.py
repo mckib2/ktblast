@@ -2,6 +2,7 @@
 
 import numpy as np
 from skimage.util import pad
+from tqdm import trange
 
 def ktblast(kspace, calib, calib_win=None, freq_win=None,
             safety_margin=2, time_axis=-1):
@@ -70,12 +71,19 @@ def ktblast(kspace, calib, calib_win=None, freq_win=None,
     imspace_avg = np.sqrt(kx*ky)*np.fft.fftshift(np.fft.ifft2(
         np.fft.ifftshift(kspace_avg)))
 
-    from mr_utils import view
-    view(imspace_avg)
+    # Subtract temporally averaged k-space from individual time frames
+    resid = kspace - kspace_avg[..., None]
 
-    assert False
+    # Inverse FFT the residual time frames, do in loop for memory
+    # considerations...
+    for ii in range(kt):
+        resid[..., ii] = np.sqrt(kx*ky)*np.fft.fftshift(np.fft.ifft2(
+            np.fft.ifftshift(resid[..., ii])))
 
+    # Assume coil noise covariance is identity
+    Cn = np.eye(kx)
 
+    # Prepare the calibration data:
     # In-plane inverse Fourier transform of calibration data
     # Zero-padding: adds zeros around calibration data to match size
     # of kspace.  If difference in size between calib and kspace is
@@ -93,24 +101,51 @@ def ktblast(kspace, calib, calib_win=None, freq_win=None,
             mode='constant'),
         axes=axes), axes=axes), axes=axes)
 
-    # Now construct an x-t array for each column
-    t_ctr = int(ct/2)
-    for ii in range(ky):
-        xt = lowres[:, ii, :]
+    # For each column...
+    kt2 = int(kt/2)
+    ct2 = int(ct/2)
+    recon = np.zeros((kx, ky, kt), dtype=kspace.dtype)
+    for ii in trange(ky, leave=False, desc='k-t BLAST'):
+        # For DC baseline estimate, use the image column as f=0
+        xf_base = np.zeros((kx, kt), dtype=kspace.dtype)
+        xf_base[:, kt2] = imspace_avg[:, ii]
 
-        # Inverse Fourier transform along t to get x-f array
-        xf = np.sqrt(ct)*np.fft.fftshift(np.fft.ifft(np.fft.ifftshift(
-            xt, axes=-1), axis=-1), axes=-1)
+        # For the difference data, construct the x-t array and
+        # inverse Fourier transform along t to get x-f array
+        xf_resid = np.sqrt(kt)*np.fft.fftshift(np.fft.ifft(
+            np.fft.ifftshift(resid[:, ii, :], axes=-1),
+            axis=-1), axes=-1)
 
-        # Set f=0 to zero
-        xf[:, t_ctr] = 0
+        # Now we need the same for the calibration data, set f=0 to 0
+        xf_calib = np.sqrt(ct)*np.fft.fftshift(np.fft.ifft(
+            np.fft.ifftshift(lowres[:, ii, :], axes=-1),
+            axis=-1), axes=-1)
+        xf_calib[:, ct2] = 0
 
         # Filter in f to attenuate high temporal frequencies and
         # safety margin
-        xf *= freq_win*safety_margin
+        xf_calib *= freq_win*safety_margin
 
-        # Squared magnitude gives estimated squared deviation
-        Mxf2_diag = np.abs(xf)**2
+        # Squared magnitude gives estimated squared deviation.
+        # I don't know how this is actually supposed to work, so just
+        # assume that the middle column in the middle diagonal and
+        # ignore the rest?
+        M2 = np.abs(xf_calib)**2
+        M2 = np.diag(M2[:, ct2])
+
+        # Don't worry about coil sensitivities for now k-t BLAST
+        recon[:, ii, :] = xf_base + M2 @ np.linalg.pinv(
+            M2 + Cn) @ (xf_resid - xf_base)
+
+    # Fourier transform across frequency to get time back
+    recon = 1/np.sqrt(kt)*np.fft.ifftshift(np.fft.fft(np.fft.fftshift(
+        recon, axes=-1), axis=-1), axes=-1)
+
+    # I don't think it worked -- we get the temporal average back I
+    # think...
+
+    # Move time_axis back to where the user had it
+    return np.moveaxis(recon, -1, time_axis)
 
 if __name__ == '__main__':
     pass

@@ -22,6 +22,7 @@ setup(
         "matplotlib>=2.2.4",
         "phantominator>=0.1.2",
         "scikit-image>=0.14.3",
+        "tqdm>=4.32.2",
     ],
     python_requires='>=3.5',
 )
