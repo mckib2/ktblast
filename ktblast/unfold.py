@@ -40,7 +40,6 @@ def unfold(kspace, time_axis=-1):
     # 1) zero‐fill the unacquired phase‐encode lines.
     # This is the assumed form for the input kspace data.
 
-
     # 2) apply the inverse Fourier transform along the spatial and
     # temporal directions
     xf_u = kt2xf(kspace, shift=True)
