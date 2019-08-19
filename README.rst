@@ -7,7 +7,7 @@ algorithms.
 Usage
 =====
 
-.. code-block::python
+.. code-block:: python
 
     # UNFOLD algorithm
     from ktblast import unfold
