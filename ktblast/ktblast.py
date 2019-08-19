@@ -10,9 +10,23 @@ def ktblast(
 
     Parameters
     ----------
+    xf_aliased : array_like
+        Undersampled, aliased data in x-f space.
+    xf_prior : array_like
+        Prior info in x-f space.
+    kt_grid : array_like
+        Undersampling grid in kx-ky-t space.
+    R : int
+        Undersampling factor in y.
+    psi : float, optional
+        Noise variance.
+    time_axis : int, optional
+        Dimension that holds time/frequency data.
 
     Returns
     -------
+    xf_ktblast : array_like
+        Reconstructed x-f space.
 
     Raises
     ------
