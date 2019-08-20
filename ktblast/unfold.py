@@ -27,8 +27,9 @@ def unfold(kspace, time_axis=-1):
     References
     ----------
     .. [1] Tsao, Jeffrey. "On the UNFOLD method." Magnetic Resonance
-    in Medicine: An Official Journal of the International Society for
-    Magnetic Resonance in Medicine 47.1 (2002): 202-207.
+           in Medicine: An Official Journal of the International
+           Society for Magnetic Resonance in Medicine 47.1 (2002):
+           202-207.
     '''
 
     # Move time axis to the back of the bus
