@@ -1,13 +1,16 @@
 '''Basic demo of UNFOLD method.'''
 
 import numpy as np
+from phantominator import dynamic
 
 from ktblast import unfold
 
 if __name__ == '__main__':
 
     # Load phantom
-    kspace = np.load('data/phantom.npy')
+    ph = dynamic(256, 40)
+    kspace = np.fft.fftshift(np.fft.fft2(np.fft.fftshift(
+        ph, axes=(0, 1)), axes=(0, 1)), axes=(0, 1))
 
     # Shear grid, R=2
     kspace_u = np.zeros(kspace.shape, dtype=kspace.dtype)
