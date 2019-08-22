@@ -2,7 +2,7 @@
 
 import numpy as np
 
-def kt2xf(kt, shift=False, coil_axis=-1):
+def kt2xf(kt, shift=False, time_axis=-1):
     '''k-t space to x-f space.
 
     Parameters
@@ -20,14 +20,14 @@ def kt2xf(kt, shift=False, coil_axis=-1):
         Corresponding x-f space data.
     '''
 
-    # Do the transformin' (also move coil axis to and fro)
+    # Do the transformin' (also move time axis to and fro)
     if not shift:
         return np.moveaxis(np.fft.fft(np.fft.ifft2(
-            np.moveaxis(kt, coil_axis, -1),
-            axes=(0, 1)), axis=-1), -1, coil_axis)
+            np.moveaxis(kt, time_axis, -1),
+            axes=(0, 1)), axis=-1), -1, time_axis)
 
     return np.moveaxis(np.fft.fftshift(np.fft.ifft2(np.fft.ifftshift(
         np.fft.ifftshift(np.fft.fft(
-            np.moveaxis(kt, coil_axis, -1),
+            np.moveaxis(kt, time_axis, -1),
             axis=-1), axes=-1),
-        axes=(0, 1)), axes=(0, 1)), axes=(0, 1)), -1, coil_axis)
+        axes=(0, 1)), axes=(0, 1)), axes=(0, 1)), -1, time_axis)

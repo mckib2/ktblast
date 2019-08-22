@@ -20,8 +20,8 @@ setup(
     install_requires=[
         "numpy>=1.16.4",
         "matplotlib>=2.2.4",
-        "phantominator>=0.3.1",
-        "scikit-image>=0.14.3",
+        "phantominator>=0.3.2",
+        "scikit-image>=0.15.0",
         "tqdm>=4.32.2",
     ],
     python_requires='>=3.5',
