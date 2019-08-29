@@ -12,15 +12,24 @@ Currently included modules are:
 Usage
 =====
 
+See examples module and doc strings -- both good resources for full
+arguments list and usage.
+
 .. code-block:: python
 
     # UNFOLD algorithm
     from ktblast import unfold
+
     sx, sy, st = kspace[:]
-    recon = unfold(kspace)
+    recon = unfold(kspace, time_axis=-1)
 
     # k-t BLAST algorithm
     from ktblast import ktblast
+
+    sx, sy, st = kspace[:]
+    sx, sy, st = calib[:]
+    recon = ktblast(kspace, calib, psi, time_axis=-1)
+
 
 About
 =====
