@@ -4,6 +4,11 @@ k-t BLAST
 Python implementation of several k-t BLAST-like MR reconstruction
 algorithms.
 
+Currently included modules are:
+
+- UNFOLD
+- k-t BLAST
+
 Usage
 =====
 
