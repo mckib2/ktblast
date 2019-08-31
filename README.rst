@@ -9,6 +9,15 @@ Currently included modules are:
 - UNFOLD
 - k-t BLAST
 
+Installation
+============
+
+Should be a quick pip install:
+
+.. code-block:: bash
+
+    pip install ktblast
+
 Usage
 =====
 
